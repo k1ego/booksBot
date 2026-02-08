@@ -8,7 +8,9 @@ class CategoryCBData(CallbackData, prefix="category"):
 
 class BookCBData(CallbackData, prefix="book"):
     id: int
-    category: str
+
+class BuyBookCBData(CallbackData, prefix="buy-book"):
+    id: int
 
 
 def generate_catalog_kb(categories):
@@ -26,15 +28,15 @@ def generate_catalog_kb(categories):
     return keyboard
 
 
-def generate_books_kb(books, category):
+def generate_books_kb(books):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[])
 
     for book in books:
         keyboard.inline_keyboard.append(
             [
                 InlineKeyboardButton(
-                    text=book["name"].format(book["id"]),
-                    callback_data=BookCBData(id=book["id"], category=category).pack(),
+                    text=book.name.format(book.id),
+                    callback_data=BookCBData(id=book.id).pack(),
                 )
             ]
         )
@@ -44,13 +46,19 @@ def generate_books_kb(books, category):
     return keyboard
 
 
-def back_to_category_catalog_kb(category_cb):
+def back_to_category_catalog_kb(book_id, category_id):
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
+                    text="Купить",
+                    callback_data=BuyBookCBData(id=book_id).pack(),
+                )
+            ],
+            [
+                InlineKeyboardButton(
                     text=" << Назад",
-                    callback_data=CategoryCBData(category=category_cb).pack(),
+                    callback_data=CategoryCBData(category_id=category_id).pack(),
                 )
             ]
         ]

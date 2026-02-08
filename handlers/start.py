@@ -15,6 +15,6 @@ async def start_bot(message: types.Message, user_repo: UserRepo):
         message.from_user.username,
     )
     await message.answer(
-        f"Привет, {message.from_user.full_name}!\nЯ магазин книг, выбери нужно меню снизу:",
+        f"Привет, {message.from_user.full_name}!\nЯ магазин книг, выбери нужное меню снизу:",
         reply_markup=main_menu_kb(),
     )

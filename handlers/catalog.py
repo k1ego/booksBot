@@ -8,6 +8,7 @@ from keyboards.catalog import (
     generate_books_kb,
     generate_catalog_kb,
 )
+from repositories.books import BookRepo
 from repositories.categories import CategoryRepo
 
 router = Router()
@@ -33,37 +34,31 @@ async def catalog(
 
 
 @router.callback_query(CategoryCBData.filter())
-async def category_info(callback: types.CallbackQuery, callback_data: CategoryCBData, category_repo: CategoryRepo):
+async def category_info(callback: types.CallbackQuery, 
+                        callback_data: CategoryCBData,
+                        category_repo: CategoryRepo,
+                        book_repo: BookRepo,
+                        ):
 
     category = await category_repo.get_by_id(callback_data.category_id)
+    books = await book_repo.get_books_by_category_id(callback_data.category_id)
 
     await callback.message.edit_text(
         text=category.description,
-        reply_markup=generate_books_kb(category["books"], callback_data.category),
+        reply_markup=generate_books_kb(books),
     )
 
 
 @router.callback_query(BookCBData.filter())
-async def book_info(callback: types.CallbackQuery, callback_data: BookCBData):
-    book_id = callback_data.id
-    category = CATALOG.get(callback_data.category)
-
-    book = None
-
-    for bk in category["books"]:
-        if bk["id"] == book_id:
-            book = bk
-            break
-
-    if not book:
-        return await callback.answer("Книга не найдена.")
+async def book_info(callback: types.CallbackQuery, callback_data: BookCBData, book_repo: BookRepo):
+    book = await book_repo.get_book_by_id(callback_data.id)
 
     await callback.message.edit_text(
         text=(
-            f"Название - {book['name'].format(book['id'])}\n"
-            f"Описание - {book['description'].format(book['id'])}\n"
-            f"Цена: {book['price']}руб.\n\n"
+            f"Название - {book.name.format(book.id)}\n"
+            f"Описание - {book.description.format(book.id)}\n"
+            f"Цена: {book.price}руб.\n\n"
             "Хотите купить эту книгу?"
         ),
-        reply_markup=back_to_category_catalog_kb(callback_data.category),
-    )
+        reply_markup=back_to_category_catalog_kb(book.id, book.category_id),
+    ) 
