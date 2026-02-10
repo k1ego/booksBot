@@ -29,9 +29,10 @@ class UserRepo:
         self.__session.add(user)
 
     async def update_balance(self, tg_id: int, amount: int):
-        amount = amount * 100
-
-        statement = update(User).where(User.tg_id == tg_id).values(balance=User.balance + amount)
-        
-        await self.__session.execute(statement) 
+        statement = (
+            update(User)
+            .where(User.tg_id == tg_id)
+            .values(balance=User.balance + amount)
+        )
+        await self.__session.execute(statement)
         await self.__session.commit()

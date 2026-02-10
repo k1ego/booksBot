@@ -20,9 +20,9 @@ async def user_profile_info(
 
     await message.answer(
         f"<b>{message.from_user.full_name}</b>\n\n"
-        f"Username - {user.username or 'Не указан'}\n"
-        f"ID - <code>{user.tg_id}</code>\n"
-        f"Ваш баланс - {user.view_balance} руб.",
+        f"Username: {user.username or 'Не указан'}\n"
+        f"ID: <code>{user.tg_id}</code>\n"
+        f"Ваш баланс: {user.view_balance} руб.",
         parse_mode=ParseMode.HTML,
         reply_markup=profile_kb.profile_menu(),
     )
@@ -32,7 +32,8 @@ async def user_profile_info(
 async def user_deposit_action(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer()
     await callback_query.message.edit_text(
-        "Введите сумму пополнения:", reply_markup=profile_kb.break_action_and_back_to_main_menu()
+        "Введите сумму пополнения:",
+        reply_markup=profile_kb.break_action_and_back_to_main_menu(),
     )
     await state.set_state(UserDepositState.INPUT_AMOUNT)
 
@@ -48,9 +49,9 @@ async def user_deposit_action_cancel(
 
     await callback_query.message.answer(
         f"<b>{callback_query.from_user.full_name}</b>\n\n"
-        f"Username - {user.username or 'Не указан'}\n"
-        f"ID - <code>{user.tg_id}</code>\n"
-        f"Ваш баланс - {user.view_balance} руб.",
+        f"Username: {user.username or 'Не указан'}\n"
+        f"ID: <code>{user.tg_id}</code>\n"
+        f"Ваш баланс: {user.view_balance} руб.",
         parse_mode=ParseMode.HTML,
         reply_markup=profile_kb.profile_menu(),
     )
@@ -88,15 +89,10 @@ async def apply_deposit_user(
     state_data = await state.get_data()
     deposit_amount = state_data.get("deposit_amount")
 
-    
-    await user_repo.update_balance(callback_query.from_user.id, deposit_amount)
+    await user_repo.update_balance(callback_query.from_user.id, deposit_amount * 100)
     await callback_query.message.edit_text(
         f"Баланс успешно пополнен на {deposit_amount} руб.",
-        reply_markup=profile_kb.break_action_and_back_to_main_menu(
-            "Профиль"
-        ),
+        reply_markup=profile_kb.break_action_and_back_to_main_menu("Профиль"),
     )
-    
-    await callback_query.answer()
 
-    
+    await callback_query.answer()

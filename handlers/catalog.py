@@ -1,8 +1,10 @@
 from __future__ import annotations
 from aiogram import F, Router, types
 
+from filters.check_buy_item import FilterUserCanBuyBook
 from keyboards.catalog import (
     BookCBData,
+    BuyBookCBData,
     CategoryCBData,
     back_to_category_catalog_kb,
     generate_books_kb,
@@ -10,6 +12,7 @@ from keyboards.catalog import (
 )
 from repositories.books import BookRepo
 from repositories.categories import CategoryRepo
+from repositories.user import UserRepo
 
 router = Router()
 
@@ -57,8 +60,25 @@ async def book_info(callback: types.CallbackQuery, callback_data: BookCBData, bo
         text=(
             f"Название - {book.name.format(book.id)}\n"
             f"Описание - {book.description.format(book.id)}\n"
-            f"Цена: {book.price}руб.\n\n"
+            f"Цена: {round(book.price / 100, 2)}руб.\n\n"
             "Хотите купить эту книгу?"
         ),
         reply_markup=back_to_category_catalog_kb(book.id, book.category_id),
     ) 
+
+@router.callback_query(FilterUserCanBuyBook(), BuyBookCBData.filter())
+async def buy_book_action(callback: types.CallbackQuery, callback_data: BookCBData, book_repo: BookRepo, user_repo: UserRepo):
+
+    book = await book_repo.get_book_by_id(callback_data.id)
+
+    await user_repo.update_balance(callback.from_user.id, -book.price)
+
+    await callback.message.answer(
+        text=(
+            f"Вы купили книгу - {book.name.format(book.id)}\n"
+            f"Описание - {book.description.format(book.id)}\n"
+            f"Цена: {round(book.price / 100, 2)}руб.\n\n"
+            "Спасибо за покупку!"
+        )
+    )
+    await callback.answer()
