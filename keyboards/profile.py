@@ -12,12 +12,12 @@ def profile_menu():
 				]
 		)
 
-def cancel_deposit_action():
+def break_action_and_back_to_main_menu(text: str = "Отменить"):
 		return InlineKeyboardMarkup(
 				inline_keyboard=[
 						[
 								InlineKeyboardButton(
-										text="Отмена",
+										text=text,
 										callback_data="cancel_deposit"
 								)
 						]

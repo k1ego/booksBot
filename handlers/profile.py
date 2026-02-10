@@ -32,8 +32,7 @@ async def user_profile_info(
 async def user_deposit_action(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer()
     await callback_query.message.edit_text(
-        "Введите сумму пополнения:", 
-        reply_markup=profile_kb.cancel_deposit_action()
+        "Введите сумму пополнения:", reply_markup=profile_kb.break_action_and_back_to_main_menu()
     )
     await state.set_state(UserDepositState.INPUT_AMOUNT)
 
@@ -43,7 +42,7 @@ async def user_deposit_action_cancel(
     callback_query: types.CallbackQuery, state: FSMContext, user_repo: UserRepo
 ):
     await state.clear()
-    await callback_query.answer()   
+    await callback_query.answer()
 
     user = await user_repo.get_user_by_tg_id(callback_query.from_user.id)
 
@@ -56,6 +55,7 @@ async def user_deposit_action_cancel(
         reply_markup=profile_kb.profile_menu(),
     )
 
+
 @router.message(UserDepositState.INPUT_AMOUNT)
 async def user_deposit_amount(
     message: types.Message, state: FSMContext, user_repo: UserRepo
@@ -66,7 +66,9 @@ async def user_deposit_amount(
 
     amount = int(message.text)
     if amount <= 0:
-        await message.answer("Сумма должна быть положительным числом. Попробуйте еще раз.")
+        await message.answer(
+            "Сумма должна быть положительным числом. Попробуйте еще раз."
+        )
         return
 
     # Сохранение суммы в состоянии
@@ -76,4 +78,25 @@ async def user_deposit_amount(
         f"Вы хотите пополнить баланс на {amount} руб. Подтвердите действие.",
         reply_markup=profile_kb.confirm_deposit_action(),
     )
-    await state.set_state(UserDepositState.APPLY_DEPOSIT)    
+    await state.set_state(UserDepositState.APPLY_DEPOSIT)
+
+
+@router.callback_query(UserDepositState.APPLY_DEPOSIT)
+async def apply_deposit_user(
+    callback_query: types.CallbackQuery, state: FSMContext, user_repo: UserRepo
+):
+    state_data = await state.get_data()
+    deposit_amount = state_data.get("deposit_amount")
+
+    
+    await user_repo.update_balance(callback_query.from_user.id, deposit_amount)
+    await callback_query.message.edit_text(
+        f"Баланс успешно пополнен на {deposit_amount} руб.",
+        reply_markup=profile_kb.break_action_and_back_to_main_menu(
+            "Профиль"
+        ),
+    )
+    
+    await callback_query.answer()
+
+    
