@@ -10,3 +10,8 @@ class User(BaseModel):
 		tg_id: Mapped[int] = mapped_column(BigInteger, unique=True)
 		username: Mapped[Optional[str]]
 		fullname: Mapped[str]
+		balance: Mapped[int] = mapped_column(default=0)
+
+		@property
+		def view_balance(self):
+				return round(self.balance / 100, 4)
