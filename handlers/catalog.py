@@ -37,11 +37,12 @@ async def catalog(
 
 
 @router.callback_query(CategoryCBData.filter())
-async def category_info(callback: types.CallbackQuery, 
-                        callback_data: CategoryCBData,
-                        category_repo: CategoryRepo,
-                        book_repo: BookRepo,
-                        ):
+async def category_info(
+    callback: types.CallbackQuery,
+    callback_data: CategoryCBData,
+    category_repo: CategoryRepo,
+    book_repo: BookRepo,
+):
 
     category = await category_repo.get_by_id(callback_data.category_id)
     books = await book_repo.get_books_by_category_id(callback_data.category_id)
@@ -53,21 +54,34 @@ async def category_info(callback: types.CallbackQuery,
 
 
 @router.callback_query(BookCBData.filter())
-async def book_info(callback: types.CallbackQuery, callback_data: BookCBData, book_repo: BookRepo):
+async def book_info(
+    callback: types.CallbackQuery,
+    callback_data: BookCBData,
+    book_repo: BookRepo,
+    user_repo: UserRepo,
+):
     book = await book_repo.get_book_by_id(callback_data.id)
+    user = await user_repo.get_user_by_tg_id(callback.from_user.id)
 
     await callback.message.edit_text(
         text=(
             f"Название - {book.name.format(book.id)}\n"
             f"Описание - {book.description.format(book.id)}\n"
-            f"Цена: {round(book.price / 100, 2)}руб.\n\n"
+            f"Цена: {round(book.price / 100, 2)}руб.\n"
+            f"Ваш баланс: {user.view_balance} руб.\n\n"
             "Хотите купить эту книгу?"
         ),
         reply_markup=back_to_category_catalog_kb(book.id, book.category_id),
-    ) 
+    )
+
 
 @router.callback_query(FilterUserCanBuyBook(), BuyBookCBData.filter())
-async def buy_book_action(callback: types.CallbackQuery, callback_data: BookCBData, book_repo: BookRepo, user_repo: UserRepo):
+async def buy_book_action(
+    callback: types.CallbackQuery,
+    callback_data: BookCBData,
+    book_repo: BookRepo,
+    user_repo: UserRepo,
+):
 
     book = await book_repo.get_book_by_id(callback_data.id)
 
