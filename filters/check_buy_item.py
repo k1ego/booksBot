@@ -14,12 +14,9 @@ class FilterUserCanBuyBook(Filter):
         if not callback.data or not callback.data.startswith("buy-book:"):
             return False  # Пропускаем все остальные callback data
         
-        print(f"DEBUG: Processing buy-book callback data: '{callback.data}'")
-        
         try:
             # Парсим callback data с помощью CallbackData
             callback_data = BuyBookCBData.unpack(callback.data)
-            print(f"DEBUG: Successfully unpacked: id={callback_data.id}")
 
             book_id = callback_data.id
 

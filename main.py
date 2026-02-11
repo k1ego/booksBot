@@ -10,12 +10,6 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 TOKEN = ""
 
 
-# плохой подход тк изменения не мигригруются в бд
-async def init_model(engine):
-    async with engine.begin() as conn:
-        await conn.run_sync(BaseModel.metadata.create_all)
-
-
 async def main():
     bot = Bot(token=TOKEN)
     dp = Dispatcher()
@@ -26,7 +20,6 @@ async def main():
     register_middlewares(dp, session_maker)
     register_routes(dp)
 
-    await init_model(engine)
     await dp.start_polling(bot)
 
 
