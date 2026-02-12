@@ -9,7 +9,7 @@ from alembic import context
 
 # 👇 ВАЖНО: импортируем BaseModel и все модели
 from database import BaseModel
-from database.models import User, Category, Book
+from database import User, Category, Book, Favorite
 
 # this is the Alembic Config object
 config = context.config

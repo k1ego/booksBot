@@ -1,5 +1,5 @@
 from database.models import BaseModel
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import ForeignKey
 
 
@@ -11,3 +11,5 @@ class Book(BaseModel):
     description: Mapped[str]
     price: Mapped[int]  # 1$ = 100 cents
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"))
+
+    favorites = relationship("Favorite", back_populates="book")

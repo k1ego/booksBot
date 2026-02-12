@@ -1,6 +1,6 @@
 from typing import Optional
 from database.models import BaseModel
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import BigInteger
 
 class User(BaseModel):
@@ -15,3 +15,5 @@ class User(BaseModel):
 		@property
 		def view_balance(self):
 				return round(self.balance / 100, 4)
+		
+		favorites = relationship("Favorite", back_populates="user")

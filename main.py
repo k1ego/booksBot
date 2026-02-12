@@ -7,7 +7,7 @@ from middlewares import register_middlewares
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-TOKEN = ""
+TOKEN = "8574911316:AAE9f4NBhT2L7ewolOyvFVuQpHMiL7lH_W4"
 
 
 async def main():
